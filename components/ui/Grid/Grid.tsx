@@ -1,7 +1,7 @@
 import cn from 'classnames';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Component, FC, ReactNode } from 'react';
+import { FC, ReactNode } from 'react';
 
 import s from './Grid.module.css';
 
@@ -17,7 +17,10 @@ export interface ItemData {
   title: string;
   description: string;
   link: LinkData;
-  img?: any;
+  img?: {
+    url: string;
+    title: string;
+  };
 }
 
 export interface LinkData {
@@ -26,19 +29,19 @@ export interface LinkData {
 }
 
 export interface DataProps {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   grid: GridData[];
 }
 
 interface Props {
   className?: string;
-  children?: ReactNode[] | Component[] | any[];
+  children?: ReactNode | ReactNode[];
   variant?: 'cols4' | string;
   data?: DataProps;
 }
 
-const Grid: FC<Props> = ({ className, children, variant, data = {} }) => {
+const Grid: FC<Props> = ({ className, children, variant, data = { grid: [] } }) => {
   const rootClassName = cn(
     s.root,
     {
@@ -47,11 +50,10 @@ const Grid: FC<Props> = ({ className, children, variant, data = {} }) => {
     className,
   );
 
-  // If it contains data we build the childrens.
   const { grid } = data;
 
-  if (grid) {
-    const meassureProps =
+  if (grid && grid.length > 0) {
+    const measureProps =
       variant === 'cols4'
         ? {
             width: 263,
@@ -68,27 +70,30 @@ const Grid: FC<Props> = ({ className, children, variant, data = {} }) => {
           {data.title && (
             <h2 className="mb-2 text-4xl font-semibold tracking-wide uppercase">{data.title}</h2>
           )}
-          {data.description && <p className="">{data.description}</p>}
+          {data.description && <p>{data.description}</p>}
         </div>
         <div className={rootClassName}>
-          {grid.map((item: any, i) => (
+          {grid.map((item, i) => (
             <div className="flex flex-col items-center text-center mb-10" key={`item__${i}`}>
               <div className="mb-2">
-                {item?.img?.url && (
-                  <Image alt={item.img.title} src={item.img.url} {...meassureProps} />
+                {item?.item?.img?.url && (
+                  <Image alt={item.item.img.title} src={item.item.img.url} {...measureProps} />
                 )}
               </div>
-              {item.title && (
-                <h2 className="mb-2 text-lg font-medium tracking-wide uppercase">{item.title}</h2>
+              {item.item.title && (
+                <h2 className="mb-2 text-lg font-medium tracking-wide uppercase">{item.item.title}</h2>
               )}
-              {item.description && (
-                <div className="mb-2 px-4" dangerouslySetInnerHTML={{ __html: item.description }} />
+              {item.item.description && (
+                <div
+                  className="mb-2 px-4"
+                  dangerouslySetInnerHTML={{ __html: item.item.description }}
+                />
               )}
               <Link
                 className="mt-4 uppercase font-semibold tracking-wide text-xs text-slate-900 bg-white rounded-full px-4 py-3 border border-slate-400 hover:border-black transition ease-linear duration-150"
-                href={item?.link?.url ? item?.link?.url : '/'}
+                href={item.item.link?.url || '/'}
               >
-                {item?.link?.title}
+                {item.item.link?.title}
               </Link>
             </div>
           ))}
